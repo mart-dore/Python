@@ -3,7 +3,7 @@ import random
 from enum import Enum
 from collections import namedtuple
 import numpy as np
-import colorsys
+from .utils import BLACK, BLOCK_SIZE, BLUE1, BLUE2
 
 
 pygame.init()
@@ -18,18 +18,9 @@ class Direction(Enum):
 
 Point = namedtuple('Point', 'x, y')
 
-# rgb colors
-WHITE = (255, 255, 255)
-RED = (200,0,0)
-BLUE1 = (0, 0, 255)
-BLUE2 = (0, 100, 255)
-BLACK = (0,0,0)
-COLOR_STEP = 50
-BLOCK_SIZE = 20
-SPEED = 1000
+SPEED = 250
 
 class SnakeGameAI:
-
     def __init__(self, w=640, h=480):
         self.w = w
         self.h = h
@@ -115,16 +106,13 @@ class SnakeGameAI:
         # draw background
         self.display.fill(BLACK)
 
-        # draw snake 
-        i = 1
+        # draw snake
         for pt in self.snake:
-            hue = (i * COLOR_STEP) % 360
-            color = tuple(int(x * 255) for x in colorsys.hsv_to_rgb(hue / 360, 1.0, 1.0))
-            
             pygame.draw.rect(self.display, BLUE2, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
-            pygame.draw.rect(self.display, color, pygame.Rect(pt.x+4, pt.y+4, 12, 12))
-            i += 1
         
+        # change head color
+        pygame.draw.rect(self.display, BLUE1, pygame.Rect(self.head.x, self.head.y, BLOCK_SIZE, BLOCK_SIZE))
+
         # draw apple
         pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
 
@@ -133,10 +121,8 @@ class SnakeGameAI:
         self.display.blit(text, [0, 0])
         pygame.display.flip()
 
-
     def _move(self, action):
         # [straight, right, left]
-
         clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
         idx = clock_wise.index(self.direction)
 
