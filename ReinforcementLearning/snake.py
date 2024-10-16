@@ -3,12 +3,22 @@ import random
 from enum import Enum
 from collections import namedtuple
 import numpy as np
-from .utils import BLACK, BLOCK_SIZE, BLUE1, BLUE2
 
 
 pygame.init()
 # font = pygame.font.Font('arial.ttf', 25)
 font = pygame.font.SysFont('arial', 25)
+
+# useful constants
+# rgb colors
+WHITE = (255, 255, 255)
+RED = (200,0,0)
+BLUE1 = (0, 0, 255)
+BLUE2 = (0, 100, 255)
+BLACK = (0,0,0)
+
+BLOCK_SIZE = 20
+SPEED = 250
 
 class Direction(Enum):
     RIGHT = 1
@@ -18,7 +28,6 @@ class Direction(Enum):
 
 Point = namedtuple('Point', 'x, y')
 
-SPEED = 250
 
 class SnakeGameAI:
     def __init__(self, w=640, h=480):
@@ -42,16 +51,16 @@ class SnakeGameAI:
 
         self.score = 0
         self.food = None
-        self._place_food()
+        self.place_food()
         self.frame_iteration = 0
 
 
-    def _place_food(self):
+    def place_food(self):
         x = random.randint(0, (self.w-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
         y = random.randint(0, (self.h-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
         self.food = Point(x, y)
         if self.food in self.snake:
-            self._place_food()
+            self.place_food()
 
 
     def play_step(self, action):
@@ -63,7 +72,7 @@ class SnakeGameAI:
                 quit()
         
         # 2. move
-        self._move(action) # update the head
+        self.move(action) # update the head
         self.snake.insert(0, self.head)
         
         # 3. check if game over
@@ -78,12 +87,12 @@ class SnakeGameAI:
         if self.head == self.food:
             self.score += 1
             reward = 10
-            self._place_food()
+            self.place_food()
         else:
             self.snake.pop()
         
         # 5. update ui and clock
-        self._update_ui()
+        self.update_ui()
         self.clock.tick(SPEED)
         # 6. return game over and score
         return reward, game_over, self.score
@@ -102,7 +111,7 @@ class SnakeGameAI:
         return False
 
 
-    def _update_ui(self):
+    def update_ui(self):
         # draw background
         self.display.fill(BLACK)
 
@@ -121,7 +130,7 @@ class SnakeGameAI:
         self.display.blit(text, [0, 0])
         pygame.display.flip()
 
-    def _move(self, action):
+    def move(self, action):
         # [straight, right, left]
         clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
         idx = clock_wise.index(self.direction)
